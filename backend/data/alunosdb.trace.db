@@ -157,3 +157,9 @@ GET ALUNO [42001-232]
 2025-04-21 16:16:42.869543-03:00 jdbc[13]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]get"; expected "GRANT"; SQL statement:
 get [42001-232]
+2025-04-23 22:44:31.335994-03:00 jdbc[33]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ALUNOS" not found; SQL statement:
+DELETE FROM alunos WHERE id = 45, 46 [42102-232]
+2025-04-23 22:45:00.560696-03:00 jdbc[33]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "DELETE FROM ALUNO  WHERE id = 45[*], 46"; SQL statement:
+DELETE FROM ALUNO  WHERE id = 45, 46 [42000-232]
