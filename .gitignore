@@ -1,0 +1,47 @@
+# Diretórios de build
+/target/
+/bin/
+/build/
+
+# Diretórios de IDEs
+/.idea/
+/*.iml
+/.vscode/
+/*.classpath
+/*.project
+/*.settings/
+
+# Maven
+.mvn/
+**/mvnw
+**/mvnw.cmd
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Configurações Temporárias
+*.swp
+*.swo
+
+# Arquivos de ambiente sensíveis
+application-prod.properties
+application-dev.properties
+.env
+*.env
+
+# Banco de dados locais (se usar H2, SQLite etc)
+*.mv.db
+*.h2.db
+
+# Node/Frontend (caso tenha sobrado algo)
+frontend/node_modules/
+/node_modules/
+
+# Outros
+*.bak
+*.tmp
+*.old
