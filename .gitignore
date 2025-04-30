@@ -11,11 +11,6 @@
 /*.project
 /*.settings/
 
-# Maven
-.mvn/
-**/mvnw
-**/mvnw.cmd
-
 # Sistema operacional
 .DS_Store
 Thumbs.db
