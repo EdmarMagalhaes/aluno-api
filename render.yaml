@@ -1,17 +1,15 @@
 services:
   - type: web
     name: aluno-api
-    env: java
+    runtime: docker
     plan: free
     rootDir: backend
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/*.jar
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://ep-bitter-sunset-acgm06ap.sa-east-1.aws.neon.tech/neondb?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
-        value: alunoapi_s11q_user
+        value: neondb_owner
       - key: SPRING_DATASOURCE_PASSWORD
-        value: 30Er4CLV8o5ecBR4MfXPM3ZoubrvXxwJ
+        value: sua_senha_aqui
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
         value: update
