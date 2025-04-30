@@ -1,11 +1,9 @@
 services:
   - type: web
     name: aluno-api
-    env: java
-    plan: free
+    runtime: docker
     rootDir: backend
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/*.jar
+    plan: free
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://ep-bitter-sunset-acgm06ap.sa-east-1.aws.neon.tech/neondb?sslmode=require
