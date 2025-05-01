@@ -1,101 +1,77 @@
 
 # 🎓 Aluno API + Frontend
 
-Sistema completo de cadastro de alunos, com notas, status de aprovação e filtros inteligentes. Projeto fullstack com deploy em nuvem.
-
-![Banner](https://raw.githubusercontent.com/EdmarMagalhaes/aluno-api/main/docs/banner.png)
+Sistema completo para gerenciamento de alunos com cadastro, edição, listagem com filtros e integração com banco de dados PostgreSQL hospedado na nuvem (Neon), backend em Spring Boot e frontend moderno em React + Tailwind.
 
 ---
 
-## 🚀 Tecnologias utilizadas
+## 🌐 Demonstração
 
-### Backend
-- Java 17 + Spring Boot
-- Spring Data JPA + Hibernate
-- PostgreSQL (Neon)
-- Deploy: Render
-
-### Frontend
-- React + Vite
-- TailwindCSS
-- Axios
-- Deploy: Render (Static Site)
+- 🔗 Backend online: [aluno-api.onrender.com](https://aluno-api.onrender.com/alunos)
+- 🎯 Frontend online: [aluno-frontend.onrender.com](https://aluno-frontend.onrender.com)
 
 ---
 
-## 🧪 Funcionalidades
+## 📸 Imagens
 
-- ✅ Cadastro, edição e exclusão de alunos
-- ✅ Cálculo automático do status (`Aprovado` ou `Reprovado`)
-- ✅ Filtros por nome, status e nota mínima
-- ✅ Conexão com banco PostgreSQL em nuvem (Neon)
-- ✅ Deploy fullstack (API + frontend)
+### 🖼️ Banner
+![Banner do Sistema](docs/banner.png)
 
----
-
-## 📷 Imagens
-
-### 🔍 Listagem de Alunos
-![Listagem](https://raw.githubusercontent.com/EdmarMagalhaes/aluno-api/main/docs/listagem.png)
+### 📋 Lista de Alunos
+![Tela de Listagem](docs/listagem.png)
 
 ### 📝 Cadastro / Edição
-![Formulario](https://raw.githubusercontent.com/EdmarMagalhaes/aluno-api/main/docs/formulario.png)
+![Formulário](docs/formulario.png)
 
 ---
 
-## 🧰 Como clonar e rodar o projeto localmente
+## 🚀 Como rodar o projeto
 
+### 🔁 Clone o repositório
 ```bash
-# Clone o repositório
 git clone https://github.com/EdmarMagalhaes/aluno-api.git
-
-# Acesse a pasta do projeto
 cd aluno-api
+```
 
-# Inicie o backend
+### 🔧 Backend (Spring Boot)
+```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
+### 💻 Frontend (React + Vite)
 ```bash
-# Em outro terminal, inicie o frontend
 cd frontend
 npm install
 npm run dev
 ```
 
-> Acesse o app em `http://localhost:5173`  
-> A API estará disponível em `http://localhost:8080`
+---
+
+## 🔍 Funcionalidades
+
+- ✅ Cadastro de aluno
+- ✅ Edição de aluno
+- ✅ Exclusão de aluno
+- ✅ Filtros por nome, status (Aprovado/Reprovado) e nota mínima
+- ✅ API REST documentada
+- ✅ Banco de dados PostgreSQL na nuvem (Neon)
+- ✅ Deploy completo com Render
 
 ---
 
-## 🌐 Acesso Online
+## 🛠️ Tecnologias
 
-- 🔗 API: https://aluno-api.onrender.com
-- 🔗 Frontend: https://aluno-frontend.onrender.com
-
----
-
-## 📁 Estrutura do Projeto
-
-```
-aluno-api/
-├── backend/      # API REST com Spring Boot
-├── frontend/     # Interface React com Vite
-└── render.yaml   # Configuração de deploy Render
-```
+- **Spring Boot 3**
+- **Java 17**
+- **React + Vite + TypeScript**
+- **Tailwind CSS**
+- **Neon (PostgreSQL Cloud)**
+- **Render (Deploy)**
 
 ---
 
 ## 👨‍💻 Autor
 
 **Edmar Magalhães**  
-📧 edmarpmc@gmail.com  
-📌 Projeto com fins educacionais e práticos
-
----
-
-## 📄 Licença
-
-Este projeto é livre para uso acadêmico, educacional e evoluções pessoais.  
-Contribuições são bem-vindas! 🚀
+[GitHub](https://github.com/EdmarMagalhaes)
