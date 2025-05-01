@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://aluno-frontend.onrender.com")
+                        .allowedOrigins("http://localhost:5173", "https://aluno-frontend.onrender.com")
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }
