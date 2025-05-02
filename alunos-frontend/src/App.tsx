@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import AlunoForm from './components/AlunoForm';
 import AlunoList from './components/AlunoList';
@@ -16,7 +17,6 @@ function App() {
   const [alunoToDelete, setAlunoToDelete] = useState<Aluno | null>(null);
   const [filtro, setFiltro] = useState<AlunoFiltro>({});
 
-  // ✅ Para controlar se o toast de lentidão já foi mostrado
   const jaMostrouAviso = useRef(false);
 
   const fetchAlunos = async () => {
@@ -26,54 +26,38 @@ function App() {
 
       const tempoFim = Date.now();
 
-      // ✅ Mostra aviso só no primeiro carregamento e se demorar
       if (!jaMostrouAviso.current && (tempoFim - tempoInicio > 3000)) {
-        toast.info("Este é um sistema protótipo. O primeiro carregamento pode demorar um pouco devido à hibernação do servidor.");
+        toast.info("Primeiro carregamento pode demorar um pouco pois o servidor pode estar hibernando.");
         jaMostrouAviso.current = true;
       }
 
-      // ✅ Normalização da resposta da API
       if (Array.isArray(data)) {
         setAlunos(data);
       } else if (data && typeof data === 'object') {
-        if (Array.isArray(data.content)) {
-          setAlunos(data.content);
-        } else if (Array.isArray(data.data)) {
-          setAlunos(data.data);
-        } else if (Array.isArray(data.items)) {
-          setAlunos(data.items);
-        } else if (Array.isArray(data.alunos)) {
-          setAlunos(data.alunos);
+        const arraysPossiveis = [data.content, data.data, data.items, data.alunos];
+        const resultado = arraysPossiveis.find(a => Array.isArray(a));
+        if (resultado) {
+          setAlunos(resultado);
         } else {
           if (data.id) {
             setAlunos([data]);
           } else {
-            const alunosArray = Object.values(data).filter(item =>
-              item && typeof item === 'object' && 'nome' in item && 'nota' in item
-            );
-            if (alunosArray.length > 0) {
-              setAlunos(alunosArray as Aluno[]);
-            } else {
-              setAlunos([]);
-              console.error('Resposta inesperada da API:', data);
-            }
+            setAlunos([]);
           }
         }
       } else {
-        console.error('Resposta da API não reconhecida:', data);
         setAlunos([]);
       }
 
     } catch (error) {
       console.error('Erro ao buscar alunos:', error);
-      toast.error('Erro ao carregar a lista de alunos.');
+      toast.error('Erro ao carregar alunos.');
       setAlunos([]);
     }
   };
 
   useEffect(() => {
     fetchAlunos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtro]);
 
   const handleAddAluno = () => {
@@ -98,20 +82,12 @@ function App() {
       if (selectedAluno && selectedAluno.id) {
         const atualizado = await AlunoService.atualizarAluno(selectedAluno.id, aluno);
         novoOuAtualizadoAluno = atualizado as Aluno;
-
-        const alunosAtualizados = alunos.map(a =>
-          a.id === selectedAluno.id ? { ...a, ...novoOuAtualizadoAluno } : a
-        );
-        setAlunos(alunosAtualizados);
-
+        setAlunos(alunos.map(a => a.id === selectedAluno.id ? novoOuAtualizadoAluno : a));
         toast.success(`Aluno ${aluno.nome} atualizado com sucesso!`);
-
       } else {
         const novo = await AlunoService.cadastrarAluno(aluno);
         novoOuAtualizadoAluno = novo as Aluno;
-
         setAlunos([...alunos, novoOuAtualizadoAluno]);
-
         toast.success(`Aluno ${aluno.nome} cadastrado com sucesso!`);
       }
 
@@ -120,7 +96,7 @@ function App() {
 
     } catch (error) {
       console.error('Erro ao salvar aluno:', error);
-      toast.error('Erro ao salvar aluno. Tente novamente.');
+      toast.error('Erro ao salvar aluno.');
     }
   };
 
@@ -128,17 +104,12 @@ function App() {
     if (alunoToDelete && alunoToDelete.id) {
       try {
         await AlunoService.deletarAluno(alunoToDelete.id);
-
-        const alunosAtualizados = alunos.filter(a => a.id !== alunoToDelete.id);
-        setAlunos(alunosAtualizados);
-
+        setAlunos(alunos.filter(a => a.id !== alunoToDelete.id));
         toast.success(`Aluno ${alunoToDelete.nome} excluído com sucesso!`);
-
         fetchAlunos();
-
       } catch (error) {
         console.error('Erro ao excluir aluno:', error);
-        toast.error('Erro ao excluir aluno. Tente novamente.');
+        toast.error('Erro ao excluir aluno.');
       }
     }
     setIsDeleteModalVisible(false);
@@ -165,20 +136,18 @@ function App() {
       <div className="mb-6 flex justify-end">
         <button
           onClick={handleAddAluno}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
           Adicionar Novo Aluno
         </button>
       </div>
 
       {isFormVisible && (
-        <div className="mb-8">
-          <AlunoForm
-            aluno={selectedAluno || undefined}
-            onSubmit={handleFormSubmit}
-            onCancel={() => setIsFormVisible(false)}
-          />
-        </div>
+        <AlunoForm
+          aluno={selectedAluno || undefined}
+          onSubmit={handleFormSubmit}
+          onCancel={() => setIsFormVisible(false)}
+        />
       )}
 
       <AlunoList
