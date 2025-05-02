@@ -17,20 +17,19 @@ function App() {
   const [alunoToDelete, setAlunoToDelete] = useState<Aluno | null>(null);
   const [filtro, setFiltro] = useState<AlunoFiltro>({});
 
+  const [isLoading, setIsLoading] = useState(false);
   const jaMostrouAviso = useRef(false);
 
   const fetchAlunos = async () => {
+    setIsLoading(true);
     const tempoInicio = Date.now();
-
-    // 👉 Exibe o toast de carregando imediatamente
-    const toastId = toast.loading("Carregando alunos...");
 
     try {
       const data = await AlunoService.listarAlunos(filtro);
 
       const tempoFim = Date.now();
 
-      toast.success("Lista de alunos carregada com sucesso!", { id: toastId });
+      toast.success("Lista de alunos carregada com sucesso!");
 
       if (!jaMostrouAviso.current && (tempoFim - tempoInicio > 3000)) {
         toast.info("Primeiro carregamento pode demorar um pouco pois o servidor pode estar hibernando.");
@@ -57,8 +56,10 @@ function App() {
 
     } catch (error) {
       console.error('Erro ao buscar alunos:', error);
-      toast.error('Erro ao carregar alunos.', { id: toastId });
+      toast.error('Erro ao carregar alunos.');
       setAlunos([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -138,6 +139,12 @@ function App() {
           Sistema de Gerenciamento de Alunos
         </h1>
       </header>
+
+      {isLoading && (
+        <div className="mb-4 text-center text-blue-700 font-semibold">
+          🔄 Carregando alunos...
+        </div>
+      )}
 
       <div className="mb-6 flex justify-end">
         <button
