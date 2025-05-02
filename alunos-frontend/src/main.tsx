@@ -3,11 +3,12 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 
-import { Toaster } from "@/components/ui/toaster"; // ✅ Novo import conforme estrutura atualizada
+// Importa o Toaster do sonner
+import { Toaster } from "sonner";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-    <Toaster /> {/* Novo toaster, não usa mais ToastProvider */}
+    <Toaster richColors position="top-center" />
   </StrictMode>,
 );

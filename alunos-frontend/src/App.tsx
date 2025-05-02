@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AlunoForm from './components/AlunoForm';
 import AlunoList from './components/AlunoList';
 import DeleteConfirmation from './components/DeleteConfirmation';
-import Notification from './components/Notification';
 import { Aluno, AlunoFiltro } from './interfaces/Aluno';
 import { AlunoService } from './services/AlunoService';
 import './App.css';
-import { useToast } from "@/hooks/use-toast";
 
-
+import { toast } from "sonner";
 
 function App() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
@@ -16,13 +14,10 @@ function App() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [alunoToDelete, setAlunoToDelete] = useState<Aluno | null>(null);
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [filtro, setFiltro] = useState<AlunoFiltro>({});
 
-  // Controle para mostrar o aviso só uma vez
+  // ✅ Para controlar se o toast de lentidão já foi mostrado
   const jaMostrouAviso = useRef(false);
-
-  const { toast } = useToast();
 
   const fetchAlunos = async () => {
     const tempoInicio = Date.now();
@@ -31,16 +26,13 @@ function App() {
 
       const tempoFim = Date.now();
 
+      // ✅ Mostra aviso só no primeiro carregamento e se demorar
       if (!jaMostrouAviso.current && (tempoFim - tempoInicio > 3000)) {
-        toast({
-          title: "Atenção",
-          description: "Este é um sistema protótipo. O primeiro carregamento pode demorar um pouco devido à hibernação do servidor.",
-          variant: "default",
-          duration: 5000
-        });
+        toast.info("Este é um sistema protótipo. O primeiro carregamento pode demorar um pouco devido à hibernação do servidor.");
         jaMostrouAviso.current = true;
       }
 
+      // ✅ Normalização da resposta da API
       if (Array.isArray(data)) {
         setAlunos(data);
       } else if (data && typeof data === 'object') {
@@ -53,7 +45,6 @@ function App() {
         } else if (Array.isArray(data.alunos)) {
           setAlunos(data.alunos);
         } else {
-          console.log('Formato de resposta da API:', data);
           if (data.id) {
             setAlunos([data]);
           } else {
@@ -64,17 +55,18 @@ function App() {
               setAlunos(alunosArray as Aluno[]);
             } else {
               setAlunos([]);
-              console.error('Não foi possível converter a resposta da API em um array de alunos:', data);
+              console.error('Resposta inesperada da API:', data);
             }
           }
         }
       } else {
-        console.error('Resposta da API em formato desconhecido:', data);
+        console.error('Resposta da API não reconhecida:', data);
         setAlunos([]);
       }
+
     } catch (error) {
       console.error('Erro ao buscar alunos:', error);
-      showNotification('Erro ao carregar a lista de alunos', 'error');
+      toast.error('Erro ao carregar a lista de alunos.');
       setAlunos([]);
     }
   };
@@ -83,13 +75,6 @@ function App() {
     fetchAlunos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtro]);
-
-  const showNotification = (message: string, type: 'success' | 'error') => {
-    setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 5000);
-  };
 
   const handleAddAluno = () => {
     setSelectedAluno(null);
@@ -114,26 +99,20 @@ function App() {
         const atualizado = await AlunoService.atualizarAluno(selectedAluno.id, aluno);
         novoOuAtualizadoAluno = atualizado as Aluno;
 
-        if (Array.isArray(alunos)) {
-          const alunosAtualizados = alunos.map(a =>
-            a.id === selectedAluno.id ? { ...a, ...novoOuAtualizadoAluno } : a
-          );
-          setAlunos(alunosAtualizados);
-        }
+        const alunosAtualizados = alunos.map(a =>
+          a.id === selectedAluno.id ? { ...a, ...novoOuAtualizadoAluno } : a
+        );
+        setAlunos(alunosAtualizados);
 
-        showNotification(`Aluno ${aluno.nome} atualizado com sucesso!`, 'success');
+        toast.success(`Aluno ${aluno.nome} atualizado com sucesso!`);
 
       } else {
         const novo = await AlunoService.cadastrarAluno(aluno);
         novoOuAtualizadoAluno = novo as Aluno;
 
-        if (Array.isArray(alunos)) {
-          setAlunos([...alunos, novoOuAtualizadoAluno]);
-        } else {
-          setAlunos([novoOuAtualizadoAluno]);
-        }
+        setAlunos([...alunos, novoOuAtualizadoAluno]);
 
-        showNotification(`Aluno ${aluno.nome} cadastrado com sucesso!`, 'success');
+        toast.success(`Aluno ${aluno.nome} cadastrado com sucesso!`);
       }
 
       setIsFormVisible(false);
@@ -141,12 +120,8 @@ function App() {
 
     } catch (error) {
       console.error('Erro ao salvar aluno:', error);
-      showNotification('Erro ao salvar aluno. Tente novamente.', 'error');
+      toast.error('Erro ao salvar aluno. Tente novamente.');
     }
-  };
-
-  const handleFormCancel = () => {
-    setIsFormVisible(false);
   };
 
   const confirmDelete = async () => {
@@ -154,17 +129,16 @@ function App() {
       try {
         await AlunoService.deletarAluno(alunoToDelete.id);
 
-        if (Array.isArray(alunos)) {
-          const alunosAtualizados = alunos.filter(a => a.id !== alunoToDelete.id);
-          setAlunos(alunosAtualizados);
-        }
+        const alunosAtualizados = alunos.filter(a => a.id !== alunoToDelete.id);
+        setAlunos(alunosAtualizados);
 
-        showNotification(`Aluno ${alunoToDelete.nome} excluído com sucesso!`, 'success');
+        toast.success(`Aluno ${alunoToDelete.nome} excluído com sucesso!`);
+
         fetchAlunos();
 
       } catch (error) {
         console.error('Erro ao excluir aluno:', error);
-        showNotification('Erro ao excluir aluno. Tente novamente.', 'error');
+        toast.error('Erro ao excluir aluno. Tente novamente.');
       }
     }
     setIsDeleteModalVisible(false);
@@ -188,14 +162,6 @@ function App() {
         </h1>
       </header>
 
-      {notification && (
-        <Notification
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
-
       <div className="mb-6 flex justify-end">
         <button
           onClick={handleAddAluno}
@@ -210,7 +176,7 @@ function App() {
           <AlunoForm
             aluno={selectedAluno || undefined}
             onSubmit={handleFormSubmit}
-            onCancel={handleFormCancel}
+            onCancel={() => setIsFormVisible(false)}
           />
         </div>
       )}
@@ -220,13 +186,9 @@ function App() {
         onFiltroChange={handleFiltroChange}
         onEdit={handleEditAluno}
         onDelete={(id) => {
-          if (Array.isArray(alunos)) {
-            const aluno = alunos.find(a => a.id === id);
-            if (aluno) handleDeleteAluno(aluno);
-          } else {
-            console.error('A variável alunos não é um array:', alunos);
-            showNotification('Erro ao processar a lista de alunos', 'error');
-          }
+          const aluno = alunos.find(a => a.id === id);
+          if (aluno) handleDeleteAluno(aluno);
+          else toast.error('Aluno não encontrado para exclusão.');
         }}
       />
 
