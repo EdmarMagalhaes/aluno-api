@@ -21,10 +21,16 @@ function App() {
 
   const fetchAlunos = async () => {
     const tempoInicio = Date.now();
+
+    // 👉 Exibe o toast de carregando imediatamente
+    const toastId = toast.loading("Carregando alunos...");
+
     try {
       const data = await AlunoService.listarAlunos(filtro);
 
       const tempoFim = Date.now();
+
+      toast.success("Lista de alunos carregada com sucesso!", { id: toastId });
 
       if (!jaMostrouAviso.current && (tempoFim - tempoInicio > 3000)) {
         toast.info("Primeiro carregamento pode demorar um pouco pois o servidor pode estar hibernando.");
@@ -51,7 +57,7 @@ function App() {
 
     } catch (error) {
       console.error('Erro ao buscar alunos:', error);
-      toast.error('Erro ao carregar alunos.');
+      toast.error('Erro ao carregar alunos.', { id: toastId });
       setAlunos([]);
     }
   };
