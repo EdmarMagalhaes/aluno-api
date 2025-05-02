@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AlunoForm from './components/AlunoForm';
 import AlunoList from './components/AlunoList';
 import DeleteConfirmation from './components/DeleteConfirmation';
@@ -6,7 +6,9 @@ import Notification from './components/Notification';
 import { Aluno, AlunoFiltro } from './interfaces/Aluno';
 import { AlunoService } from './services/AlunoService';
 import './App.css';
-import { toast } from "sonner"; // ✅ IMPORTAÇÃO do sonner
+import { useToast } from "@/hooks/use-toast";
+
+
 
 function App() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
@@ -14,20 +16,29 @@ function App() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [alunoToDelete, setAlunoToDelete] = useState<Aluno | null>(null);
-  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [filtro, setFiltro] = useState<AlunoFiltro>({});
 
+  // Controle para mostrar o aviso só uma vez
+  const jaMostrouAviso = useRef(false);
+
+  const { toast } = useToast();
+
   const fetchAlunos = async () => {
-    const tempoInicio = Date.now(); // ✅ Marca o tempo de início
+    const tempoInicio = Date.now();
     try {
       const data = await AlunoService.listarAlunos(filtro);
 
-      // Verifica se levou mais de 3 segundos
       const tempoFim = Date.now();
-      if (tempoFim - tempoInicio > 3000) {
-        toast.info(
-          "Este é um sistema protótipo. O primeiro carregamento pode demorar um pouco devido à hibernação do servidor."
-        );
+
+      if (!jaMostrouAviso.current && (tempoFim - tempoInicio > 3000)) {
+        toast({
+          title: "Atenção",
+          description: "Este é um sistema protótipo. O primeiro carregamento pode demorar um pouco devido à hibernação do servidor.",
+          variant: "default",
+          duration: 5000
+        });
+        jaMostrouAviso.current = true;
       }
 
       if (Array.isArray(data)) {
@@ -46,7 +57,7 @@ function App() {
           if (data.id) {
             setAlunos([data]);
           } else {
-            const alunosArray = Object.values(data).filter(item => 
+            const alunosArray = Object.values(data).filter(item =>
               item && typeof item === 'object' && 'nome' in item && 'nota' in item
             );
             if (alunosArray.length > 0) {
@@ -70,6 +81,7 @@ function App() {
 
   useEffect(() => {
     fetchAlunos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtro]);
 
   const showNotification = (message: string, type: 'success' | 'error') => {
@@ -96,29 +108,37 @@ function App() {
 
   const handleFormSubmit = async (aluno: Aluno) => {
     try {
-      let novoOuAtualizadoAluno;
+      let novoOuAtualizadoAluno: Aluno;
 
       if (selectedAluno && selectedAluno.id) {
-        novoOuAtualizadoAluno = await AlunoService.atualizarAluno(selectedAluno.id, aluno);
+        const atualizado = await AlunoService.atualizarAluno(selectedAluno.id, aluno);
+        novoOuAtualizadoAluno = atualizado as Aluno;
+
         if (Array.isArray(alunos)) {
-          const alunosAtualizados = alunos.map(a => 
+          const alunosAtualizados = alunos.map(a =>
             a.id === selectedAluno.id ? { ...a, ...novoOuAtualizadoAluno } : a
           );
           setAlunos(alunosAtualizados);
         }
+
         showNotification(`Aluno ${aluno.nome} atualizado com sucesso!`, 'success');
+
       } else {
-        novoOuAtualizadoAluno = await AlunoService.cadastrarAluno(aluno);
+        const novo = await AlunoService.cadastrarAluno(aluno);
+        novoOuAtualizadoAluno = novo as Aluno;
+
         if (Array.isArray(alunos)) {
           setAlunos([...alunos, novoOuAtualizadoAluno]);
         } else {
           setAlunos([novoOuAtualizadoAluno]);
         }
+
         showNotification(`Aluno ${aluno.nome} cadastrado com sucesso!`, 'success');
       }
 
       setIsFormVisible(false);
       fetchAlunos();
+
     } catch (error) {
       console.error('Erro ao salvar aluno:', error);
       showNotification('Erro ao salvar aluno. Tente novamente.', 'error');
@@ -133,12 +153,15 @@ function App() {
     if (alunoToDelete && alunoToDelete.id) {
       try {
         await AlunoService.deletarAluno(alunoToDelete.id);
+
         if (Array.isArray(alunos)) {
           const alunosAtualizados = alunos.filter(a => a.id !== alunoToDelete.id);
           setAlunos(alunosAtualizados);
         }
+
         showNotification(`Aluno ${alunoToDelete.nome} excluído com sucesso!`, 'success');
         fetchAlunos();
+
       } catch (error) {
         console.error('Erro ao excluir aluno:', error);
         showNotification('Erro ao excluir aluno. Tente novamente.', 'error');
@@ -160,14 +183,16 @@ function App() {
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800">Sistema de Gerenciamento de Alunos</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800">
+          Sistema de Gerenciamento de Alunos
+        </h1>
       </header>
 
       {notification && (
-        <Notification 
-          message={notification.message} 
-          type={notification.type} 
-          onClose={() => setNotification(null)} 
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
         />
       )}
 
@@ -182,18 +207,18 @@ function App() {
 
       {isFormVisible && (
         <div className="mb-8">
-          <AlunoForm 
-            aluno={selectedAluno || undefined} 
-            onSubmit={handleFormSubmit} 
-            onCancel={handleFormCancel} 
+          <AlunoForm
+            aluno={selectedAluno || undefined}
+            onSubmit={handleFormSubmit}
+            onCancel={handleFormCancel}
           />
         </div>
       )}
 
-      <AlunoList 
+      <AlunoList
         alunos={alunos}
         onFiltroChange={handleFiltroChange}
-        onEdit={handleEditAluno} 
+        onEdit={handleEditAluno}
         onDelete={(id) => {
           if (Array.isArray(alunos)) {
             const aluno = alunos.find(a => a.id === id);
@@ -202,14 +227,14 @@ function App() {
             console.error('A variável alunos não é um array:', alunos);
             showNotification('Erro ao processar a lista de alunos', 'error');
           }
-        }} 
+        }}
       />
 
       {isDeleteModalVisible && alunoToDelete && (
-        <DeleteConfirmation 
-          aluno={alunoToDelete} 
-          onConfirm={confirmDelete} 
-          onCancel={cancelDelete} 
+        <DeleteConfirmation
+          aluno={alunoToDelete}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
         />
       )}
     </div>
